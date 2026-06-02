@@ -8,16 +8,16 @@ private:
         int screenX = GetScreenWidth();
         int screenY = GetScreenHeight();
 public:
-    float x;
-    float y;
+    double x;
+    double y;
     int mass;
-    float velocityX=0;
-    float velocityY=0;
+    double velocityX=0;
+    double velocityY=0;
     int radius;
 
-    Object(float x, float y, int mass, int radius, float velocityX=0, float velocityY=0);
+    Object(double x, double y, int mass, int radius, double velocityX=0, double velocityY=0);
 
-    void incrementVelocity(float forceX, float forceY);
+    void incrementVelocity(double forceX, double forceY);
 
     void move();
 

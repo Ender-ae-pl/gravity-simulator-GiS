@@ -1,24 +1,42 @@
 #include <raylib.h>
+#include <iostream>
 #include "objclass.hpp"
+extern int scale;
+extern int timescale;
+extern int massscale;
 
-Object::Object(float x, float y, int mass, int radius, float velocityX, float velocityY):x(x), y(y), mass(mass), radius(radius), velocityX(velocityX), velocityY(velocityY){};
+Object::Object(double x, double y, int mass, int radius, double velocityX, double velocityY):x(x), y(y), mass(mass), radius(radius), velocityX(velocityX), velocityY(velocityY){};
 
 
-void Object::incrementVelocity(float forceX, float forceY){
-    velocityX += forceX / (1000*mass) / scale;
-    velocityY += forceY / (1000*mass) / scale;
+void Object::incrementVelocity(double forceX, double forceY){
+    double dt = GetFrameTime() * timescale;
+    velocityX += dt * forceX / mass / massscale / scale;
+    velocityY += dt * forceY / mass / massscale / scale;
 };
 
 void Object::move(){
-    x += velocityX;
-    y += velocityY;
-    if (y>screenY || y<0){
-        y=screenY-y;
+    double dt = GetFrameTime() * timescale;
+    x += dt * velocityX;
+    y += dt * velocityY;
+    if (y>screenY){
+        y=0;
+        velocityY=0;
+        velocityX=0;
+    }
+    if (y<0){
+        y=screenY;
+        velocityY=0;
+        velocityX=0;
+    }
+    if (x>screenX){
+        x=0;
+        velocityX=0;
         velocityY=0;
     }
-    if (x>screenX || x<0){
-        x=screenX-x;
+    if (x<0){
+        x=screenX;
         velocityX=0;
+        velocityY=0;
     }
 };
 
