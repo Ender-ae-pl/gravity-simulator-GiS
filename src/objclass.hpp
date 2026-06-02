@@ -1,7 +1,8 @@
 #pragma once
 #include <raylib.h>
 extern int scale;
-
+extern int timescale;
+extern int massscale;
 class Object
 {
 private:
@@ -10,12 +11,12 @@ private:
 public:
     double x;
     double y;
-    int mass;
+    double mass;
     double velocityX=0;
     double velocityY=0;
     int radius;
 
-    Object(double x, double y, int mass, int radius, double velocityX=0, double velocityY=0);
+    Object(double x, double y, double mass, int radius, double velocityX=0, double velocityY=0);
 
     void incrementVelocity(double forceX, double forceY);
 

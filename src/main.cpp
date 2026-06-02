@@ -10,12 +10,16 @@ Color backgroundColor = BLACK;
 int screenWidth = 1600;
 int screenHeight = 900;
 int scale = 10;
-int timescale=500;
+int timescale=1000;
 int massscale=100000;
 
 vector<Object> objects;
 int objCount=0;
 
+
+double distance(double x1, double y1, double x2, double y2){
+    return sqrt(pow(x2-x1,2)+pow(y2-y1,2));
+}
 
 vector<double> forceDistr(double x1, double y1, double x2, double y2, double mass1, double mass2)
 {
@@ -29,12 +33,28 @@ vector<double> forceDistr(double x1, double y1, double x2, double y2, double mas
     result.push_back(forceY);
     return result;
 }
+vector<double> collision(Object& obj1, Object& obj2){
+    double dy = obj2.y - obj1.y;double dx = obj2.x - obj1.x;
+    double distance = scale*sqrt(pow(dx,2) + pow(dy,2)) +1;
+    double v1 = sqrt(pow(obj1.velocityX,2)+pow(obj1.velocityY,2));
+    double v2 = sqrt(pow(obj2.velocityX,2)+pow(obj2.velocityY,2));
+    
+    double correction = -v1;
+    obj1.velocityX *= -1;
+    obj1.velocityY *= -1;
+    cout << "pos1" << obj1.x << " " << obj1.y << endl;
+    obj1.move();
+    cout << "pos2" << obj1.x << " " << obj1.y << endl;
+    obj1.velocityX = 0;
+    obj1.velocityY = 0;
 
+    return {};
+}
 
 int main() 
 {
     InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
-    SetTargetFPS(100);
+    SetTargetFPS(60);
     
     objects.push_back(Object(400.0f, 300.0f, 30000, 30));
     objects.push_back(Object(500.0f, 100.0f, 500, 20, 0.0, 0.0));
@@ -55,6 +75,15 @@ int main()
 
             objects[i].incrementVelocity(forceX, forceY);
             objects[i].move();
+            // Collision
+            for (int j=0; j<objCount;j++){
+                if (i==j){
+                    continue;
+                }
+                if (distance(objects[i].x, objects[i].y, objects[j].x, objects[j].y) < objects[i].radius + objects[j].radius){
+                    collision(objects[i], objects[j]);
+                }
+            }
         }
         
 

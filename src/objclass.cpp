@@ -1,11 +1,9 @@
 #include <raylib.h>
 #include <iostream>
 #include "objclass.hpp"
-extern int scale;
-extern int timescale;
-extern int massscale;
 
-Object::Object(double x, double y, int mass, int radius, double velocityX, double velocityY):x(x), y(y), mass(mass), radius(radius), velocityX(velocityX), velocityY(velocityY){};
+Object::Object(double x, double y, double mass, int radius, double velocityX, double velocityY):x(x), y(y), mass(mass), radius(radius), velocityX(velocityX), velocityY(velocityY){};
+
 
 
 void Object::incrementVelocity(double forceX, double forceY){
