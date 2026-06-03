@@ -57,11 +57,19 @@ int main()
     SetTargetFPS(60);
     
     objects.push_back(Object(400.0f, 300.0f, 30000, 30));
-    objects.push_back(Object(500.0f, 100.0f, 500, 20, 0.0, 0.0));
+    objects.push_back(Object(500.0f, 100.0f, 500, 20, 0.1, 0.0));
     objCount+=2;
 
     while (!WindowShouldClose())
     {
+        // Input
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
+            Vector2 mousePos = GetMousePosition();
+            objects.push_back(Object(mousePos.x, mousePos.y, 500, 20));
+            objCount++;
+        }
+
+
         // Update
         for (int i=0; i<objCount;i++){
             int forceX=0, forceY=0;
