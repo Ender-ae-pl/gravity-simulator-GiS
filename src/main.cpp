@@ -3,22 +3,49 @@
 #include <cmath>
 #include <vector>
 #include "objclass.hpp"
+#include <map>
 using namespace std;
 
 
 Color backgroundColor = BLACK;
 int screenWidth = 1600;
 int screenHeight = 900;
-int scale = 10;
-int timescale=1000;
+int scale = 70;
+int timescale=10000;
 int massscale=100000;
+map<int, Color> MassColors = {
+    {0, LIGHTGRAY},
+    {10, GRAY},
+    {25, DARKGRAY},
+    {50, BLUE},
+    {100, GREEN},
+    {250, YELLOW},
+    {500, ORANGE},
+    {1000, RED},
+    {2500, PINK},
+    {5000, VIOLET},
+    {10000, MAROON},
+};
 
 vector<Object> objects;
 int objCount=0;
-
+bool movingObject = false;
+Object* movingObjPtr = nullptr;
+Vector2 mousePos;
+Vector2 prevMousePos;
+Vector2 newobjCenter;
+double newobjMass;
 
 double distance(double x1, double y1, double x2, double y2){
     return sqrt(pow(x2-x1,2)+pow(y2-y1,2));
+}
+Color getColor(double mass){
+    for (auto& pair : MassColors) {
+        if (mass <= pair.first) {
+            return pair.second;
+        }
+    }
+    return WHITE;
 }
 
 vector<double> forceDistr(double x1, double y1, double x2, double y2, double mass1, double mass2)
@@ -56,18 +83,57 @@ int main()
     InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
     SetTargetFPS(60);
     
-    objects.push_back(Object(400.0f, 300.0f, 30000, 30));
-    objects.push_back(Object(500.0f, 100.0f, 500, 20, 0.1, 0.0));
+    objects.push_back(Object(400.0f, 300.0f, 300000, 30));
+    objects.push_back(Object(500.0f, 100.0f, 50, 20));
     objCount+=2;
 
     while (!WindowShouldClose())
     {
         // Input
+        mousePos = GetMousePosition();
+
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
-            Vector2 mousePos = GetMousePosition();
-            objects.push_back(Object(mousePos.x, mousePos.y, 500, 20));
-            objCount++;
+            // is object clicked
+            for (int i = 0; i < objCount; i++) {
+                if (distance(objects[i].x, objects[i].y, mousePos.x, mousePos.y) < objects[i].radius) {
+                    movingObject = true;
+                    movingObjPtr = &objects[i];
+                    break;
+                }
+            }
+
+            if (!movingObject){
+                // creating new object
+                newobjCenter = mousePos;
+                newobjMass = 0;
+            }
         }
+        if (movingObject && movingObjPtr != nullptr){
+            double velx = (mousePos.x - prevMousePos.x) / GetFrameTime()/ timescale;
+            double vely = (mousePos.y - prevMousePos.y) / GetFrameTime()/ timescale;
+            movingObjPtr->velocityX = velx;
+            movingObjPtr->velocityY = vely;
+            movingObjPtr->x = mousePos.x;
+            movingObjPtr->y = mousePos.y;
+
+        }
+        if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && !movingObject){
+            newobjMass += 10*massscale*GetFrameTime();
+            double radius = distance(newobjCenter.x, newobjCenter.y, mousePos.x, mousePos.y);
+            DrawCircle(newobjCenter.x, newobjCenter.y, radius, GRAY);
+        }
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)){
+            if (!movingObject){
+                double radius = distance(newobjCenter.x, newobjCenter.y, mousePos.x, mousePos.y);
+                objects.push_back(Object(newobjCenter.x, newobjCenter.y, newobjMass, radius));
+                objCount++;
+            }
+            movingObject = false;
+            movingObjPtr = nullptr;
+        }
+
+        prevMousePos = mousePos;
+
 
 
         // Update
