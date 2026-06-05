@@ -6,7 +6,6 @@
 #include <map>
 using namespace std;
 
-
 Color backgroundColor = BLACK;
 int screenWidth = 1600;
 int screenHeight = 900;
@@ -103,7 +102,7 @@ int main()
             }
 
             if (!movingObject){
-                // creating new object
+                // creation start
                 newobjCenter = mousePos;
                 newobjMass = 0;
             }
@@ -138,6 +137,8 @@ int main()
 
         // Update
         for (int i=0; i<objCount;i++){
+            
+            // Force
             int forceX=0, forceY=0;
             for (int j=0; j<objCount;j++){
                 if (i==j){
@@ -161,13 +162,11 @@ int main()
         }
         
 
-        // Draw
+        // Drawing
         BeginDrawing();
             ClearBackground(backgroundColor);
             // Draw
-            for (int i=0; i<objCount;i++){
-                objects[i].draw();
-            }
+            for (int i=0; i<objCount;i++) objects[i].draw();
 
         EndDrawing();
     }
