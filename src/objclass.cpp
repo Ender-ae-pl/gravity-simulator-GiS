@@ -38,6 +38,12 @@ void Object::move(){
     }
 };
 
+void Object::setMove(double velx, double vely){
+    double dt = GetFrameTime() * timescale;
+    x += dt * velx;
+    y += dt * vely;
+};
+
 void Object::draw(){
     if (y > screenY || y < 0 || x > screenX || x < 0){
         return;

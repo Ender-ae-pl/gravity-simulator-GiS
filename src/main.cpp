@@ -47,11 +47,22 @@ Color getColor(double mass){
     return WHITE;
 }
 
+vector<double> qformula(double a, double b, double c){
+    double discriminant = pow(b, 2) - 4 * a * c;
+    if (discriminant < 0) {
+        return {};
+    }
+    double sqrtDiscriminant = sqrt(discriminant);
+    double root1 = (-b + sqrtDiscriminant) / (2 * a);
+    double root2 = (-b - sqrtDiscriminant) / (2 * a);
+    return {root1, root2};
+}
+
 vector<double> forceDistr(double x1, double y1, double x2, double y2, double mass1, double mass2)
 {
     double dy = y2 - y1;double dx = x2 - x1;
     double distance = scale*sqrt(pow(dx,2) + pow(dy,2)) +1;
-    double totalforce = massscale*(mass1 * mass2) / pow(distance, 2);
+    double totalforce = massscale*(mass1 * mass2) / (pow(x2-x1,2)+pow(y2-y1,2)) / scale / scale;
     double forceX = dx * totalforce / distance ;
     double forceY = dy * totalforce / distance ;
     vector<double> result;
@@ -60,20 +71,56 @@ vector<double> forceDistr(double x1, double y1, double x2, double y2, double mas
     return result;
 }
 vector<double> collision(Object& obj1, Object& obj2){
-    double dy = obj2.y - obj1.y;double dx = obj2.x - obj1.x;
-    double distance = scale*sqrt(pow(dx,2) + pow(dy,2)) +1;
+    obj1.setMove(obj1.velocityX/-2, obj1.velocityY/-2);
+    obj2.setMove(obj1.velocityX/2, obj1.velocityY/2);
+
     double v1 = sqrt(pow(obj1.velocityX,2)+pow(obj1.velocityY,2));
     double v2 = sqrt(pow(obj2.velocityX,2)+pow(obj2.velocityY,2));
-    
-    double correction = -v1;
-    obj1.velocityX *= -1;
-    obj1.velocityY *= -1;
-    cout << "pos1" << obj1.x << " " << obj1.y << endl;
-    obj1.move();
-    cout << "pos2" << obj1.x << " " << obj1.y << endl;
-    obj1.velocityX = 0;
-    obj1.velocityY = 0;
 
+    if (v1<=v2){
+        return {};
+    }
+    double dv = v1-v2;
+    double p1 = obj1.mass * v1;
+    double p2 = obj2.mass * v2;
+
+        double dm = obj2.mass / obj1.mass;
+        if (dm>1){dm=1/dm;
+            cout << "type 2" << endl;
+            double pc = p1+p2;
+            double c = obj1.mass*obj2.mass*(p1*v1+p2*v2);
+            double newp2 = qformula(obj1.mass + obj2.mass, 2*obj2.mass*pc, obj2.mass*pc*pc-c)[0];
+            double newp1 = pc + newp2;
+            double newv1 = newp1 / obj1.mass;
+            double newv2 = newp2 / obj2.mass;
+            obj1.velocityX = - obj1.velocityX * newv1 / v1;
+            obj1.velocityY = - obj1.velocityY * newv1 / v1;
+            obj2.velocityX = obj2.velocityX * newv2 / v2;
+            obj2.velocityY = obj2.velocityY * newv2 / v2;
+        } else {
+            cout << "type 1" << endl;
+        // double dp = p1 * dm;
+        // double newv1 = (p1 - dp) / obj1.mass;
+        // double newv2 = (p2 + dp) / obj2.mass;
+        // double dv2x = obj1.velocityX * newv2 / v1;
+        // double dv2y = obj1.velocityY * newv2 / v1;
+        // double dv1x = obj1.velocityX * newv1 / v1;
+        // double dv1y = obj1.velocityY * newv1 / v1;
+        // obj1.velocityX += dv1x;
+        // obj1.velocityY += dv1y;
+        // obj2.velocityX += dv2x;
+        // obj2.velocityY += dv2y;
+            double pc = p1+p2;
+            double c = obj1.mass*obj2.mass*(p1*v1+p2*v2);
+            double newp2 = qformula(obj1.mass + obj2.mass, -2*obj2.mass*pc, obj2.mass*pc*pc-c)[1];
+            double newp1 = pc + newp2;
+            double newv1 = newp1 / obj1.mass;
+            double newv2 = newp2 / obj2.mass;
+            obj1.velocityX = obj1.velocityX * newv1 / v1;
+            obj1.velocityY = obj1.velocityY * newv1 / v1;
+            obj2.velocityX = obj2.velocityX * newv2 / v2;
+            obj2.velocityY = obj2.velocityY * newv2 / v2;
+        }
     return {};
 }
 
@@ -82,8 +129,8 @@ int main()
     InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
     SetTargetFPS(60);
     
-    objects.push_back(Object(400.0f, 300.0f, 300000, 30));
-    objects.push_back(Object(500.0f, 100.0f, 50, 20));
+    objects.push_back(Object(400.0f, 300.0f, 500, 30));
+    objects.push_back(Object(500.0f, 100.0f, 500, 20));
     objCount+=2;
 
     while (!WindowShouldClose())

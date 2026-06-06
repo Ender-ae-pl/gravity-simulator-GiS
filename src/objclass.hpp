@@ -22,6 +22,8 @@ public:
 
     void move();
 
+    void setMove(double velx, double vely);
+
     void draw();
 };
 
