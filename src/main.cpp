@@ -80,47 +80,44 @@ vector<double> collision(Object& obj1, Object& obj2){
     if (v1<=v2){
         return {};
     }
-    double dv = v1-v2;
     double p1 = obj1.mass * v1;
     double p2 = obj2.mass * v2;
+    double px = obj1.mass * obj1.velocityX + obj2.mass * obj2.velocityX;
+    double py = obj1.mass * obj1.velocityY + obj2.mass * obj2.velocityY;
+    double pc = sqrt(pow(px,2)+pow(py,2));
+    double dm = obj2.mass / obj1.mass;
 
-        double dm = obj2.mass / obj1.mass;
-        if (dm>1){dm=1/dm;
-            cout << "type 2" << endl;
-            double pc = p1+p2;
-            double c = obj1.mass*obj2.mass*(p1*v1+p2*v2);
-            double newp2 = qformula(obj1.mass + obj2.mass, 2*obj2.mass*pc, obj2.mass*pc*pc-c)[0];
-            double newp1 = pc + newp2;
-            double newv1 = newp1 / obj1.mass;
-            double newv2 = newp2 / obj2.mass;
-            obj1.velocityX = - obj1.velocityX * newv1 / v1;
-            obj1.velocityY = - obj1.velocityY * newv1 / v1;
-            obj2.velocityX = obj2.velocityX * newv2 / v2;
-            obj2.velocityY = obj2.velocityY * newv2 / v2;
+    if (dm>1){dm=1/dm;
+        cout << "type 2" << endl;
+        cout << &obj1 << endl;
+        cout << p1 << " " << p2 << " " << p1-p2 << endl;
+        // double pc = p1+p2;
+        double c = obj1.mass*obj2.mass*(p1*v1+p2*v2);
+        double newp2 = qformula(obj1.mass + obj2.mass, 2*obj2.mass*pc, obj2.mass*pc*pc-c)[1];
+        double newp1 = pc - newp2;
+        cout << newp1 << " " << newp2 << " " << -newp1 + newp2 << endl;
+        double newv1 = newp1 / obj1.mass;
+        double newv2 = newp2 / obj2.mass;
+        obj1.velocityX = - obj1.velocityX * newv1 / v1;
+        obj1.velocityY = - obj1.velocityY * newv1 / v1;
+        obj2.velocityX = obj1.velocityX * newv2 / v1;
+        obj2.velocityY = obj1.velocityY * newv2 / v1;
         } else {
-            cout << "type 1" << endl;
-        // double dp = p1 * dm;
-        // double newv1 = (p1 - dp) / obj1.mass;
-        // double newv2 = (p2 + dp) / obj2.mass;
-        // double dv2x = obj1.velocityX * newv2 / v1;
-        // double dv2y = obj1.velocityY * newv2 / v1;
-        // double dv1x = obj1.velocityX * newv1 / v1;
-        // double dv1y = obj1.velocityY * newv1 / v1;
-        // obj1.velocityX += dv1x;
-        // obj1.velocityY += dv1y;
-        // obj2.velocityX += dv2x;
-        // obj2.velocityY += dv2y;
-            double pc = p1+p2;
-            double c = obj1.mass*obj2.mass*(p1*v1+p2*v2);
-            double newp2 = qformula(obj1.mass + obj2.mass, -2*obj2.mass*pc, obj2.mass*pc*pc-c)[1];
-            double newp1 = pc + newp2;
-            double newv1 = newp1 / obj1.mass;
-            double newv2 = newp2 / obj2.mass;
-            obj1.velocityX = obj1.velocityX * newv1 / v1;
-            obj1.velocityY = obj1.velocityY * newv1 / v1;
-            obj2.velocityX = obj2.velocityX * newv2 / v2;
-            obj2.velocityY = obj2.velocityY * newv2 / v2;
-        }
+        cout << "type 1" << endl;
+        cout << &obj1 << endl;
+        cout << p1 << " " << p2 << " " << p1-p2 << endl;
+        // double pc = p1+p2;
+        double c = obj1.mass*obj2.mass*(p1*v1+p2*v2);
+        double newp2 = qformula(obj1.mass + obj2.mass, -2*obj2.mass*pc, obj2.mass*pc*pc-c)[0];
+        double newp1 = pc - newp2;
+        cout << newp1 << " " << newp2 << " " << +newp1 + newp2 << endl;
+        double newv1 = newp1 / obj1.mass;
+        double newv2 = newp2 / obj2.mass;
+        obj1.velocityX = obj1.velocityX * newv1 / v1;
+        obj1.velocityY = obj1.velocityY * newv1 / v1;
+        obj2.velocityX = obj1.velocityX * newv2 / v1;
+        obj2.velocityY = obj1.velocityY * newv2 / v1;
+    }
     return {};
 }
 
@@ -129,8 +126,8 @@ int main()
     InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
     SetTargetFPS(60);
     
-    objects.push_back(Object(400.0f, 300.0f, 500, 30));
-    objects.push_back(Object(500.0f, 100.0f, 500, 20));
+    objects.push_back(Object(400.0f, 300.0f, 50, 30));
+    objects.push_back(Object(500.0f, 100.0f, 5000, 20));
     objCount+=2;
 
     while (!WindowShouldClose())
