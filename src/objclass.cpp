@@ -18,23 +18,23 @@ void Object::move(){
     y += dt * velocityY;
     if (y>screenY){
         y=0;
-        velocityY=0;
-        velocityX=0;
+        // velocityY=0;
+        // velocityX=0;
     }
     if (y<0){
         y=screenY;
-        velocityY=0;
-        velocityX=0;
+        // velocityY=0;
+        // velocityX=0;
     }
     if (x>screenX){
         x=0;
-        velocityX=0;
-        velocityY=0;
+        // velocityX=0;
+        // velocityY=0;
     }
     if (x<0){
         x=screenX;
-        velocityX=0;
-        velocityY=0;
+        // velocityX=0;
+        // velocityY=0;
     }
 };
 
