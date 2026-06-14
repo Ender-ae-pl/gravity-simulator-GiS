@@ -5,10 +5,10 @@
 #include "objclass.hpp"
 #include <map>
 using namespace std;
-
+    
 Color backgroundColor = BLACK;
-int screenWidth = 1600;
-int screenHeight = 900;
+int screenWidth = 3740;
+int screenHeight = 2060;
 int scale = 70;
 int timescale=10000;
 int massscale=100000;
@@ -84,39 +84,26 @@ vector<double> collision(Object& obj1, Object& obj2){
     double p2 = obj2.mass * v2;
     double px = obj1.mass * obj1.velocityX + obj2.mass * obj2.velocityX;
     double py = obj1.mass * obj1.velocityY + obj2.mass * obj2.velocityY;
-    double pc = sqrt(pow(px,2)+pow(py,2));
+    double c1 = sqrt(pow(px,2)+pow(py,2));
+    double c2 = (obj1.mass * v1 *v1) + (obj2.mass * v2 * v2);
     double dm = obj2.mass / obj1.mass;
 
-    if (dm>1){dm=1/dm;
-        cout << "type 2" << endl;
-        cout << &obj1 << endl;
-        cout << p1 << " " << p2 << " " << p1-p2 << endl;
-        // double pc = p1+p2;
-        double c = obj1.mass*obj2.mass*(p1*v1+p2*v2);
-        double newp2 = qformula(obj1.mass + obj2.mass, 2*obj2.mass*pc, obj2.mass*pc*pc-c)[1];
-        double newp1 = pc - newp2;
-        cout << newp1 << " " << newp2 << " " << -newp1 + newp2 << endl;
-        double newv1 = newp1 / obj1.mass;
-        double newv2 = newp2 / obj2.mass;
+    if (dm>1){
+        dm=1/dm;
+        double newv1 = qformula(-1-obj1.mass/obj2.mass, -2 * (c1/obj2.mass), c2/obj1.mass - (c1*c1)/(obj1.mass)/(obj2.mass))[1];
+        double newv2 = (c1/obj2.mass) + (obj1.mass/obj2.mass) * newv1;
+        obj2.velocityX = obj1.velocityX * newv2 / v1;
+        obj2.velocityY = obj1.velocityY * newv2 / v1;
         obj1.velocityX = - obj1.velocityX * newv1 / v1;
         obj1.velocityY = - obj1.velocityY * newv1 / v1;
+
+    } else {
+        double newv1 = qformula(-1-obj1.mass/obj2.mass, 2 * (c1/obj2.mass), c2/obj1.mass - (c1*c1)/(obj1.mass)/(obj2.mass))[0];
+        double newv2 = (c1/obj2.mass) - (obj1.mass/obj2.mass) * newv1;
         obj2.velocityX = obj1.velocityX * newv2 / v1;
         obj2.velocityY = obj1.velocityY * newv2 / v1;
-        } else {
-        cout << "type 1" << endl;
-        cout << &obj1 << endl;
-        cout << p1 << " " << p2 << " " << p1-p2 << endl;
-        // double pc = p1+p2;
-        double c = obj1.mass*obj2.mass*(p1*v1+p2*v2);
-        double newp2 = qformula(obj1.mass + obj2.mass, -2*obj2.mass*pc, obj2.mass*pc*pc-c)[0];
-        double newp1 = pc - newp2;
-        cout << newp1 << " " << newp2 << " " << +newp1 + newp2 << endl;
-        double newv1 = newp1 / obj1.mass;
-        double newv2 = newp2 / obj2.mass;
         obj1.velocityX = obj1.velocityX * newv1 / v1;
         obj1.velocityY = obj1.velocityY * newv1 / v1;
-        obj2.velocityX = obj1.velocityX * newv2 / v1;
-        obj2.velocityY = obj1.velocityY * newv2 / v1;
     }
     return {};
 }
@@ -124,6 +111,7 @@ vector<double> collision(Object& obj1, Object& obj2){
 int main() 
 {
     InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
+    ToggleFullscreen();
     SetTargetFPS(60);
     
     objects.push_back(Object(400.0f, 300.0f, 50, 30));
