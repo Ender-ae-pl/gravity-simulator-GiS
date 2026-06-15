@@ -5,27 +5,13 @@
 #include "objclass.hpp"
 #include <map>
 using namespace std;
-
-
+    
 Color backgroundColor = BLACK;
-int screenWidth = 2040;
-int screenHeight = 1060;
+int screenWidth = 1920;
+int screenHeight = 1080;
 int scale = 70;
 int timescale=10000;
 int massscale=100000;
-map<int, Color> MassColors = {
-    {0, LIGHTGRAY},
-    {10, GRAY},
-    {25, DARKGRAY},
-    {50, BLUE},
-    {100, GREEN},
-    {250, YELLOW},
-    {500, ORANGE},
-    {1000, RED},
-    {2500, PINK},
-    {5000, VIOLET},
-    {10000, MAROON},
-};
 
 vector<Object> objects;
 int objCount=0;
@@ -35,17 +21,29 @@ Vector2 mousePos;
 Vector2 prevMousePos;
 Vector2 newobjCenter;
 double newobjMass;
+int color_r=0, color_g=0, color_b=20;
+int color_change=0;
 
 double distance(double x1, double y1, double x2, double y2){
     return sqrt(pow(x2-x1,2)+pow(y2-y1,2));
 }
-Color getColor(double mass){
-    for (auto& pair : MassColors) {
-        if (mass <= pair.first) {
-            return pair.second;
-        }
+
+Color getColor(){
+    if(color_change == 0) {
+        color_b++;
+        if(color_b == 255) color_change++;
     }
-    return WHITE;
+    else if(color_change == 1) {
+        color_b--;
+        color_g++;
+        if(color_g == 255) color_change++;
+    }
+    else if(color_change == 2) {
+        color_g--;
+        color_r++;
+        if(color_r == 255) color_change++;
+    }
+    return {(unsigned char)color_r, (unsigned char)color_g, (unsigned char)color_b, 255};
 }
 
 vector<double> qformula(double a, double b, double c){
@@ -71,6 +69,7 @@ vector<double> forceDistr(double x1, double y1, double x2, double y2, double mas
     result.push_back(forceY);
     return result;
 }
+
 vector<double> collision(Object& obj1, Object& obj2){
     obj1.setMove(obj1.velocityX/-2, obj1.velocityY/-2);
     obj2.setMove(obj1.velocityX/2, obj1.velocityY/2);
@@ -112,12 +111,8 @@ vector<double> collision(Object& obj1, Object& obj2){
 int main() 
 {
     InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
-    //ToggleFullscreen();
+    ToggleFullscreen();
     SetTargetFPS(60);
-    
-    objects.push_back(Object(400.0f, 300.0f, 50, 30));
-    objects.push_back(Object(500.0f, 100.0f, 5000, 20));
-    objCount+=2;
 
     while (!WindowShouldClose())
     {
@@ -152,12 +147,13 @@ int main()
         if (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && !movingObject){
             newobjMass += 10*massscale*GetFrameTime();
             double radius = distance(newobjCenter.x, newobjCenter.y, mousePos.x, mousePos.y);
-            DrawCircle(newobjCenter.x, newobjCenter.y, radius, GRAY);
+            DrawCircle(newobjCenter.x, newobjCenter.y, radius, getColor());
         }
         if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)){
             if (!movingObject){
                 double radius = distance(newobjCenter.x, newobjCenter.y, mousePos.x, mousePos.y);
-                objects.push_back(Object(newobjCenter.x, newobjCenter.y, newobjMass, radius));
+                objects.push_back(Object(newobjCenter.x, newobjCenter.y, newobjMass, radius, getColor()));
+                color_r=0; color_g=0; color_b=20; color_change=0;
                 objCount++;
             }
             movingObject = false;

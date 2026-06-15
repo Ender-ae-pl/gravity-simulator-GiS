@@ -3,11 +3,12 @@
 extern int scale;
 extern int timescale;
 extern int massscale;
+
 class Object
 {
-private:
-        int screenX = GetScreenWidth();
-        int screenY = GetScreenHeight();
+// Private automatycznie
+    int screenX = GetScreenWidth();
+    int screenY = GetScreenHeight();
 public:
     double x;
     double y;
@@ -15,8 +16,9 @@ public:
     double velocityX=0;
     double velocityY=0;
     int radius;
+    Color objColor;
 
-    Object(double x, double y, double mass, int radius, double velocityX=0, double velocityY=0);
+    Object(double x, double y, double mass, int radius, Color objColor=WHITE, double velocityX=0, double velocityY=0);
 
     void incrementVelocity(double forceX, double forceY);
 
