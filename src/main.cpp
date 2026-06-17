@@ -12,6 +12,7 @@ int screenHeight = 1080;
 int scale = 200;
 int timescale=10000;
 int massscale=100000;
+int fps = 60;
 
 vector<Object> objects;
 int objCount=0;
@@ -80,6 +81,16 @@ vector<double> collision(Object& obj1, Object& obj2){
     if (v1<=v2){
         return {};
     }
+    cout << (v1+v2)*timescale*fps << endl;
+    if ((v1+v2)*timescale*fps<1000 || distance(obj1.x, obj1.y, obj2.x, obj2.y) < (obj1.radius + obj2.radius)){
+        cout << "Objects too slow to collide: " << v1 << " " << v2 << endl;
+        if (obj1.mass > obj2.mass) {
+            return {1,1};
+        }
+        else {
+            return {1,2};
+        }
+    }
     double dx = obj2.x - obj1.x;
     double dy = obj2.y - obj1.y;
     double dist = sqrt(pow(dx,2)+pow(dy,2));
@@ -101,7 +112,7 @@ int main()
 {
     InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
     //ToggleFullscreen();
-    SetTargetFPS(60);
+    SetTargetFPS(fps);
 
     while (!WindowShouldClose())
     {
@@ -174,7 +185,21 @@ int main()
                     continue;
                 }
                 if (distance(objects[i].x, objects[i].y, objects[j].x, objects[j].y) < objects[i].radius + objects[j].radius){
-                    collision(objects[i], objects[j]);
+                    vector<double> event = collision(objects[i], objects[j]);
+
+                    if (event.size()>1 && event[0]==1){
+                    // merge
+                    objCount--;
+                    
+                    if (event[1]==1){
+                    objects[i].mass += objects[j].mass;
+                    objects[i].radius = sqrt(objects[i].radius*objects[i].radius + objects[j].radius*objects[j].radius);
+                    objects.erase(objects.begin() + j);}
+                    else{
+                    objects[j].mass += objects[i].mass;
+                    objects[j].radius = sqrt(objects[j].radius*objects[j].radius + objects[i].radius*objects[i].radius);
+                    objects.erase(objects.begin() + i);}
+                    }
                 }
             }
         }
