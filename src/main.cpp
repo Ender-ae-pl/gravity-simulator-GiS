@@ -9,7 +9,7 @@ using namespace std;
 Color backgroundColor = BLACK;
 int screenWidth = 1920;
 int screenHeight = 1080;
-int scale = 70;
+int scale = 200;
 int timescale=10000;
 int massscale=100000;
 
@@ -49,6 +49,8 @@ Color getColor(){
 vector<double> qformula(double a, double b, double c){
     double discriminant = pow(b, 2) - 4 * a * c;
     if (discriminant < 0) {
+        cout << "No real roots exist." << endl;
+        cout << "a: " << a << ", b: " << b << ", c: " << c << endl;
         return {};
     }
     double sqrtDiscriminant = sqrt(discriminant);
@@ -71,54 +73,41 @@ vector<double> forceDistr(double x1, double y1, double x2, double y2, double mas
 }
 
 vector<double> collision(Object& obj1, Object& obj2){
-    obj1.setMove(obj1.velocityX/-2, obj1.velocityY/-2);
-    obj2.setMove(obj1.velocityX/2, obj1.velocityY/2);
+    obj1.setMove(-obj1.velocityX, -obj1.velocityY);
 
     double v1 = sqrt(pow(obj1.velocityX,2)+pow(obj1.velocityY,2));
     double v2 = sqrt(pow(obj2.velocityX,2)+pow(obj2.velocityY,2));
-
     if (v1<=v2){
         return {};
     }
-    double p1 = obj1.mass * v1;
-    double p2 = obj2.mass * v2;
-    double px = obj1.mass * obj1.velocityX + obj2.mass * obj2.velocityX;
-    double py = obj1.mass * obj1.velocityY + obj2.mass * obj2.velocityY;
-    double c1 = sqrt(pow(px,2)+pow(py,2));
-    double c2 = (obj1.mass * v1 *v1) + (obj2.mass * v2 * v2);
-    double dm = obj2.mass / obj1.mass;
+    double dx = obj2.x - obj1.x;
+    double dy = obj2.y - obj1.y;
+    double dist = sqrt(pow(dx,2)+pow(dy,2));
+    double nx = dx / dist;
+    double ny = dy / dist;
+    double vr = (obj1.velocityX - obj2.velocityX) * nx + (obj1.velocityY - obj2.velocityY) * ny;
+    double impulse = (2 * vr) / (1/obj1.mass + 1/obj2.mass);
 
-    if (dm>1){
-        dm=1/dm;
-        double newv1 = qformula(-1-obj1.mass/obj2.mass, -2 * (c1/obj2.mass), c2/obj1.mass - (c1*c1)/(obj1.mass)/(obj2.mass))[1];
-        double newv2 = (c1/obj2.mass) + (obj1.mass/obj2.mass) * newv1;
-        obj2.velocityX = obj1.velocityX * newv2 / v1;
-        obj2.velocityY = obj1.velocityY * newv2 / v1;
-        obj1.velocityX = - obj1.velocityX * newv1 / v1;
-        obj1.velocityY = - obj1.velocityY * newv1 / v1;
+    obj1.velocityX -= impulse * nx / obj1.mass;
+    obj1.velocityY -= impulse * ny / obj1.mass;
+    obj2.velocityX += impulse * nx / obj2.mass;
+    obj2.velocityY += impulse * ny / obj2.mass;
 
-    } else {
-        double newv1 = qformula(-1-obj1.mass/obj2.mass, 2 * (c1/obj2.mass), c2/obj1.mass - (c1*c1)/(obj1.mass)/(obj2.mass))[0];
-        double newv2 = (c1/obj2.mass) - (obj1.mass/obj2.mass) * newv1;
-        obj2.velocityX = obj1.velocityX * newv2 / v1;
-        obj2.velocityY = obj1.velocityY * newv2 / v1;
-        obj1.velocityX = obj1.velocityX * newv1 / v1;
-        obj1.velocityY = obj1.velocityY * newv1 / v1;
-    }
+
     return {};
 }
 
 int main() 
 {
     InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
-    ToggleFullscreen();
+    //ToggleFullscreen();
     SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
         // Input
         mousePos = GetMousePosition();
-
+        
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
             // is object clicked
             for (int i = 0; i < objCount; i++) {

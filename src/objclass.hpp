@@ -6,15 +6,15 @@ extern int massscale;
 
 class Object
 {
-// Private automatycznie
+// Private
     int screenX = GetScreenWidth();
     int screenY = GetScreenHeight();
 public:
     double x;
     double y;
     double mass;
-    double velocityX=0;
-    double velocityY=0;
+    double velocityX=0.0;
+    double velocityY=0.0;
     int radius;
     Color objColor;
 
