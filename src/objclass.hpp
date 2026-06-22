@@ -22,7 +22,7 @@ public:
 
     void incrementVelocity(double forceX, double forceY);
 
-    void move();
+    void move(int mode);
 
     void setMove(double velx, double vely);
 

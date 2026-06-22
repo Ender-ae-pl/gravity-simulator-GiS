@@ -7,8 +7,6 @@
 using namespace std;
     
 Color backgroundColor = BLACK;
-int screenWidth = 1920;
-int screenHeight = 1080;
 int scale = 200;
 int timescale=10000;
 int massscale=100000;
@@ -24,6 +22,7 @@ Vector2 newobjCenter;
 double newobjMass;
 int color_r=0, color_g=0, color_b=20;
 int color_change=0;
+int mode = 1;
 
 double distance(double x1, double y1, double x2, double y2){
     return sqrt(pow(x2-x1,2)+pow(y2-y1,2));
@@ -76,6 +75,23 @@ vector<double> forceDistr(double x1, double y1, double x2, double y2, double mas
 vector<double> collision(Object& obj1, Object& obj2){
     obj1.setMove(-obj1.velocityX, -obj1.velocityY);
 
+    if(mode == 3 || mode == 4) {
+        double px1 = obj1.mass * obj1.velocityX;
+        double py1 = obj1.mass * obj1.velocityY;
+        double px2 = obj2.mass * obj2.velocityX;
+        double py2 = obj2.mass * obj2.velocityY;
+
+        double Spx = px1 + px2;
+        double Spy = py1 + py2;
+
+        obj1.velocityX = Spx/(obj1.mass + obj2.mass);
+        obj2.velocityX = Spx/(obj1.mass + obj2.mass);
+        obj1.velocityY = Spy/(obj1.mass + obj2.mass);
+        obj2.velocityY = Spy/(obj1.mass + obj2.mass);
+
+        return {};
+    }
+
     double v1 = sqrt(pow(obj1.velocityX,2)+pow(obj1.velocityY,2));
     double v2 = sqrt(pow(obj2.velocityX,2)+pow(obj2.velocityY,2));
     if (v1<=v2){
@@ -110,7 +126,7 @@ vector<double> collision(Object& obj1, Object& obj2){
 
 int main() 
 {
-    InitWindow(screenWidth, screenHeight, "GOFRY I ŚMIETANA");
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "GOFRY I ŚMIETANA");
     //ToggleFullscreen();
     SetTargetFPS(fps);
 
@@ -133,6 +149,16 @@ int main()
                 // creation start
                 newobjCenter = mousePos;
                 newobjMass = 0;
+            }
+        }
+        if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+            // is object clicked kill it
+            for (int i = 0; i < objCount; i++) {
+                if (distance(objects[i].x, objects[i].y, mousePos.x, mousePos.y) < objects[i].radius) {
+                    objects.erase(objects.begin() + i);
+                    objCount--;
+                    break;
+                }
             }
         }
         if (movingObject && movingObjPtr != nullptr){
@@ -159,6 +185,10 @@ int main()
             movingObject = false;
             movingObjPtr = nullptr;
         }
+        if(IsKeyPressed(KEY_M)) {
+            mode++;
+            if(mode == 5) mode = 1;
+        }
 
         prevMousePos = mousePos;
 
@@ -178,7 +208,7 @@ int main()
             }
 
             objects[i].incrementVelocity(forceX, forceY);
-            objects[i].move();
+            objects[i].move(mode);
             // Collision
             for (int j=0; j<objCount;j++){
                 if (i==j){
@@ -211,6 +241,12 @@ int main()
             // Draw
             for (int i=0; i<objCount;i++) objects[i].draw();
 
+            string text;
+            if(mode == 1) text = "NORMAL";
+            else if(mode == 2) text = "CHAOS";
+            else if(mode == 3) text = "GiS";
+            else if(mode == 4) text = "GiS + CHAOS";
+            DrawText(text.c_str() ,GetMonitorWidth(0)/2 - 100, GetMonitorHeight(0)-80, 50, WHITE);
         EndDrawing();
     }
     
